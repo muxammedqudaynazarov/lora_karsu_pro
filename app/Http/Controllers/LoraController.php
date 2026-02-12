@@ -10,7 +10,7 @@ class LoraController extends Controller
     public function index()
     {
         $lora = Lora::orderBy('id', 'DESC')->first();
-        return response()->json($lora);
+        return json_decode($lora->data);
     }
 
     public function store(Request $request)
