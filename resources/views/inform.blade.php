@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lora Monitoring API</title>
+    <title>Lora EM500-SMTC-868M</title>
     <style>
         :root {
             --primary: #4a90e2;
@@ -125,15 +125,16 @@
 
 <div class="dashboard">
     <div class="header">
-        <h2 id="device-name">Bog'lanmoqda...</h2>
-        <div id="status-container"><span class="status-dot pulse"></span> <small id="dev-eui">Skanerlanmoqda...</small>
+        <h2 id="device-name">Соединение...</h2>
+        <div id="status-container">
+            <span class="status-dot pulse"></span> <small id="dev-eui">Сканирование...</small>
         </div>
     </div>
 
-    <p id="error-msg">API-dan ma'lumot olishda xatolik!</p>
+    <p id="error-msg">Ошибка при получении информации из API!</p>
 
     <div class="metric-card">
-        <span class="label">🌡️ Harorat</span>
+        <span class="label">🌡️ Температура</span>
         <div class="value" id="temp-val">--°C</div>
         <div class="progress-bg">
             <div id="temp-fill" class="progress-fill temp-color"></div>
@@ -141,7 +142,7 @@
     </div>
 
     <div class="metric-card">
-        <span class="label">💧 Namlik</span>
+        <span class="label">💧 Влажность</span>
         <div class="value" id="moist-val">--%</div>
         <div class="progress-bg">
             <div id="moist-fill" class="progress-fill moist-color"></div>
@@ -149,14 +150,14 @@
     </div>
 
     <div class="metric-card">
-        <span class="label">⚡ Elektr quvvati</span>
+        <span class="label">⚡ Электричество</span>
         <div class="value" id="elec-val">-- kWh</div>
         <div class="progress-bg">
             <div id="elec-fill" class="progress-fill elec-color"></div>
         </div>
     </div>
 
-    <div class="footer">Oxirgi yangilanish: <span id="last-update">...</span></div>
+    <div class="footer">Последнее обновление: <span id="last-update">...</span></div>
 </div>
 <script>
     const API_URL = 'https://lora.nmtu.uz/api/lora/get';
@@ -164,7 +165,7 @@
     async function fetchData() {
         try {
             const response = await fetch(`${API_URL}?t=${new Date().getTime()}`);
-            if (!response.ok) throw new Error('Tarmoq xatosi');
+            if (!response.ok) throw new Error('Сетевая ошибка');
             const data = await response.json();
             const actualData = Array.isArray(data) ? data[0] : data;
             updateUI(actualData);
