@@ -10,7 +10,7 @@ class LoraController extends Controller
     public function store(Request $request)
     {
         Lora::create([
-            'data' => json_encode($request->all()),
+            'data' => $request->all(),
         ]);
     }
 }
