@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class LoraController extends Controller
 {
+    public function index()
+    {
+        $lora = Lora::orderBy('id', 'DESC')->first();
+        return response()->json($lora);
+    }
+
     public function store(Request $request)
     {
         $lora = new Lora();
