@@ -10,4 +10,6 @@ class Lora extends Model
     use HasFactory;
 
     protected $fillable = ['data'];
+
+    protected $table = 'loras';
 }
