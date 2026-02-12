@@ -159,7 +159,7 @@
     <div class="footer">Oxirgi yangilanish: <span id="last-update">...</span></div>
 </div>
 <script>
-    const API_URL = 'http://lora.nmtu.uz/api/lora/get';
+    const API_URL = 'https://lora.nmtu.uz/api/lora/get';
 
     async function fetchData() {
         try {
