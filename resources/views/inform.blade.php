@@ -210,21 +210,20 @@
 
     function updateUI(devices) {
         devices.forEach(device => {
-            // Laravel modeli orqali (latestDatum) kelsa yoki to'g'ridan-to'g'ri kelsa ham ishlaydigan mantiq
-            const name = device.deviceName || device.name || "Неизвестное устройство";
-            const eui = device.devEUI || device.id || "0000";
+            const name = device.deviceName || "Неизвестное устройство";
+            const eui = device.devEUI || "0000";
 
-            // Datchik ko'rsatkichlarini ajratib olish
-            const sensorData = device.latest_datum ? device.latest_datum : device;
-            const t = sensorData.temperature ?? 0;
-            const m = sensorData.moisture ?? 0;
-            const e = sensorData.electricity ?? sensorData.value ?? 0; // 'value' deb nomlangan ustun bo'lishi ham mumkin
+            // O'ZGARISH SHU YERDA: Ma'lumotlarni 'datum' obyekti ichidan olamiz
+            const sensorData = device.datum ? device.datum : device;
 
-            // Har bir qurilma uchun unikal ID
+            // String (matn) ko'rinishida kelayotgan raqamlarni (masalan "11.7") haqiqiy raqamga o'giramiz
+            const t = parseFloat(sensorData.temperature) || 0;
+            const m = parseFloat(sensorData.moisture) || 0;
+            const e = parseFloat(sensorData.electricity) || 0;
+
             const cardId = `device-${eui}`;
             let card = document.getElementById(cardId);
 
-            // Agar karta hali yaratilmagan bo'lsa (birinchi marta yuklanishi)
             if (!card) {
                 card = document.createElement('div');
                 card.className = 'dashboard';
@@ -269,7 +268,7 @@
                 container.appendChild(card);
             }
 
-            // Endi karta ichidagi ma'lumotlarni topib, yangilab qo'yamiz
+            // Kartadagi ma'lumotlarni yangilash
             card.querySelector('.dev-name').innerText = name;
             card.querySelector('.temp-val').innerText = t;
             card.querySelector('.moist-val').innerText = m;
@@ -283,7 +282,6 @@
 
             card.querySelector('.last-update').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
 
-            // Agar aloqa uzilgan bo'lsa qizargan chiroqni qayta yashil qilish
             const indicator = card.querySelector('.status-dot');
             indicator.style.backgroundColor = '#22c55e';
             indicator.classList.add('pulse');
