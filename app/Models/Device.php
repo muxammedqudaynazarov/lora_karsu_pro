@@ -12,6 +12,7 @@ class Device extends Model
     protected $fillable = [
         'deviceName',
         'devEUI',
+        'location',
         'status',
     ];
 

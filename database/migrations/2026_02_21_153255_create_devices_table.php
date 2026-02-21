@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('deviceName');
             $table->string('devEUI');
+            $table->text('location')->nullable();
             $table->enum('status', ['0', '1', '2'])->default('1');
             $table->timestamps();
         });
