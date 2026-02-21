@@ -317,7 +317,7 @@
 
     // Dastlabki ishga tushirish va har 30 soniyada takrorlash
     fetchData();
-    setInterval(fetchData, 30000);
+    setInterval(fetchData, 15000);
 </script>
 
 </body>
