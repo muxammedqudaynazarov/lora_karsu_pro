@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lora EM500-SMTC-868M</title>
+    <title>Lora Devices Dashboard</title>
     <style>
         :root {
             --primary: #4a90e2;
@@ -19,14 +19,20 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            padding: 16px; /* Mobil chekkalari uchun bo'shliq */
+            padding: 20px;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Mobil teginish effektini tozalash */
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+        }
+
+        /* Barcha qurilmalarni ushlab turuvchi asosiy konteyner */
+        .app-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .dashboard {
@@ -35,9 +41,10 @@
             border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 400px; /* Kompyuterda juda keng bo'lib ketmaydi */
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
@@ -79,7 +86,6 @@
             transition: background 0.2s;
         }
 
-        /* Mobil bosish effekti */
         .metric-card:active {
             background: rgba(255, 255, 255, 0.08);
             transform: scale(0.99);
@@ -133,7 +139,7 @@
             text-align: center;
             font-size: 0.75rem;
             color: #475569;
-            margin-top: 24px;
+            margin-top: auto;
             padding-top: 16px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -147,18 +153,20 @@
             100% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
         }
 
-        #error-msg {
+        #global-error-msg {
             color: #fda4af;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             text-align: center;
             display: none;
             background: rgba(159, 18, 57, 0.2);
-            padding: 10px;
+            padding: 12px;
             border-radius: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* Kichik ekranlar uchun shriftni moslashtirish */
         @media (max-width: 360px) {
             .value { font-size: 1.6rem; }
             .dashboard { padding: 16px; }
@@ -167,95 +175,122 @@
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="header">
-        <h2 id="device-name">Соединение...</h2>
-        <div class="status-container">
-            <span class="status-dot pulse" id="indicator"></span>
-            <small id="dev-eui">Поиск...</small>
-        </div>
-    </div>
+<div id="global-error-msg">⚠️ Ошибка подключения к серверу или обновления данных</div>
 
-    <p id="error-msg">⚠️ Ошибка обновления данных</p>
-
-    <div class="metric-card">
-        <span class="label">🌡️ Температура</span>
-        <div class="value">
-            <span id="temp-val">--</span>
-            <span class="unit">°C</span>
-        </div>
-        <div class="progress-bg"><div id="temp-fill" class="progress-fill temp-color"></div></div>
-    </div>
-
-    <div class="metric-card">
-        <span class="label">💧 Влажность</span>
-        <div class="value">
-            <span id="moist-val">--</span>
-            <span class="unit">%</span>
-        </div>
-        <div class="progress-bg"><div id="moist-fill" class="progress-fill moist-color"></div></div>
-    </div>
-
-    <div class="metric-card">
-        <span class="label">⚡ Электричество</span>
-        <div class="value">
-            <span id="elec-val">--</span>
-            <span class="unit">kWh</span>
-        </div>
-        <div class="progress-bg"><div id="elec-fill" class="progress-fill elec-color"></div></div>
-    </div>
-
-    <div class="footer">
-        Обновлено в <span id="last-update">--:--:--</span>
-    </div>
+<div id="app-container" class="app-container">
 </div>
 
 <script>
-    const API_URL = 'https://lora.nmtu.uz/api/lora/get';
+    const API_URL = 'https://wan.nmtu.uz/api/lora/get';
+    const container = document.getElementById('app-container');
+    const globalError = document.getElementById('global-error-msg');
 
     async function fetchData() {
         try {
-            // Mobil tarmoqlarda kesh muammosini oldini olish
             const response = await fetch(`${API_URL}?nocache=${Date.now()}`);
-            if (!response.ok) throw new Error();
+            if (!response.ok) throw new Error('API Error');
             const data = await response.json();
-            const actualData = Array.isArray(data) ? data[0] : data;
-            updateUI(actualData);
-            document.getElementById('error-msg').style.display = 'none';
+
+            // Kelayotgan ma'lumot massiv ekanligiga ishonch hosil qilish
+            const devices = Array.isArray(data) ? data : [data];
+
+            updateUI(devices);
+            globalError.style.display = 'none';
         } catch (error) {
-            console.error('API Error');
-            document.getElementById('error-msg').style.display = 'block';
-            document.getElementById('indicator').style.backgroundColor = '#f43f5e';
-            document.getElementById('indicator').classList.remove('pulse');
+            console.error('Data Fetch Error:', error);
+            globalError.style.display = 'block';
+
+            // Xato bo'lganda barcha datchiklardagi yashil chiroqni qizilga o'tkazish
+            document.querySelectorAll('.status-dot').forEach(dot => {
+                dot.style.backgroundColor = '#f43f5e';
+                dot.classList.remove('pulse');
+            });
         }
     }
 
-    function updateUI(data) {
-        if (!data) return;
+    function updateUI(devices) {
+        devices.forEach(device => {
+            // Laravel modeli orqali (latestDatum) kelsa yoki to'g'ridan-to'g'ri kelsa ham ishlaydigan mantiq
+            const name = device.deviceName || device.name || "Неизвестное устройство";
+            const eui = device.devEUI || device.id || "0000";
 
-        document.getElementById('device-name').innerText = data.deviceName || "EM500-SMTC";
-        document.getElementById('dev-eui').innerText = "ID: " + (data.devEUI || "---");
+            // Datchik ko'rsatkichlarini ajratib olish
+            const sensorData = device.latest_datum ? device.latest_datum : device;
+            const t = sensorData.temperature ?? 0;
+            const m = sensorData.moisture ?? 0;
+            const e = sensorData.electricity ?? sensorData.value ?? 0; // 'value' deb nomlangan ustun bo'lishi ham mumkin
 
-        const t = data.temperature ?? 0;
-        const m = data.moisture ?? 0;
-        const e = data.electricity ?? 0;
+            // Har bir qurilma uchun unikal ID
+            const cardId = `device-${eui}`;
+            let card = document.getElementById(cardId);
 
-        // Raqamlarni animatsiya bilan yangilash (ixtiyoriy, oddiy matn almashtirish)
-        document.getElementById('temp-val').innerText = t;
-        document.getElementById('moist-val').innerText = m;
-        document.getElementById('elec-val').innerText = e;
+            // Agar karta hali yaratilmagan bo'lsa (birinchi marta yuklanishi)
+            if (!card) {
+                card = document.createElement('div');
+                card.className = 'dashboard';
+                card.id = cardId;
 
-        // Progres barlar (Maksimal qiymatlar: Temp 50, Moist 100)
-        const tWidth = Math.min(Math.max((t / 50) * 100, 0), 100);
-        document.getElementById('temp-fill').style.width = tWidth + "%";
-        document.getElementById('moist-fill').style.width = Math.min(m, 100) + "%";
-        document.getElementById('elec-fill').style.width = (e > 0 ? 100 : 0) + "%";
+                card.innerHTML = `
+                    <div class="header">
+                        <h2 class="dev-name">${name}</h2>
+                        <div class="status-container">
+                            <span class="status-dot pulse"></span>
+                            <small class="dev-eui">ID: ${eui}</small>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">🌡️ Температура</span>
+                        <div class="value">
+                            <span class="temp-val">--</span>
+                            <span class="unit">°C</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-fill temp-color temp-fill"></div></div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">💧 Влажность</span>
+                        <div class="value">
+                            <span class="moist-val">--</span>
+                            <span class="unit">%</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-fill moist-color moist-fill"></div></div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="label">⚡ Электричество</span>
+                        <div class="value">
+                            <span class="elec-val">--</span>
+                            <span class="unit">kWh</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-fill elec-color elec-fill"></div></div>
+                    </div>
+                    <div class="footer">
+                        Обновлено в <span class="last-update">--:--:--</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
 
-        document.getElementById('last-update').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-        document.getElementById('indicator').style.backgroundColor = '#22c55e';
-        document.getElementById('indicator').classList.add('pulse');
+            // Endi karta ichidagi ma'lumotlarni topib, yangilab qo'yamiz
+            card.querySelector('.dev-name').innerText = name;
+            card.querySelector('.temp-val').innerText = t;
+            card.querySelector('.moist-val').innerText = m;
+            card.querySelector('.elec-val').innerText = e;
+
+            // Progres barlarni hisoblash
+            const tWidth = Math.min(Math.max((t / 50) * 100, 0), 100);
+            card.querySelector('.temp-fill').style.width = tWidth + "%";
+            card.querySelector('.moist-fill').style.width = Math.min(m, 100) + "%";
+            card.querySelector('.elec-fill').style.width = (e > 0 ? 100 : 0) + "%";
+
+            card.querySelector('.last-update').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
+            // Agar aloqa uzilgan bo'lsa qizargan chiroqni qayta yashil qilish
+            const indicator = card.querySelector('.status-dot');
+            indicator.style.backgroundColor = '#22c55e';
+            indicator.classList.add('pulse');
+        });
     }
 
+    // Dastlabki ishga tushirish va har 30 soniyada takrorlash
     fetchData();
     setInterval(fetchData, 30000);
 </script>
