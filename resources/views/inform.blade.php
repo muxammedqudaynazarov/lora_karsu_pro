@@ -295,7 +295,7 @@
                     </div>
                     <div class="footer">
                         Обновлено в <span class="last-update">--:--:--</span>
-                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link">📍 Локация</a></span>
+                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link">Локация</a></span>
                     </div>
                 `;
                 container.appendChild(card);
