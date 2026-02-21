@@ -23,7 +23,7 @@ class LoraController extends Controller
                 'temperature' => $request->temperature,
                 'moisture' => $request->moisture,
                 'electricity' => $request->electricity,
-                'data' => json_encode($request),
+                'data' => json_encode($request->all()),
             ]);
             return response()->json([
                 'status' => 'success',
