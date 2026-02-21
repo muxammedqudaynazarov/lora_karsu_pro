@@ -295,7 +295,7 @@
                     </div>
                     <div class="footer">
                         Обновлено в <span class="last-update">--:--:--</span>
-                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link">Локация</a></span>
+                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link" style="color: color: #475569;">Локация</a></span>
                     </div>
                 `;
                 container.appendChild(card);
@@ -318,9 +318,9 @@
             let timeText = "--:--:--";
             if (sensorData.created_at) {
                 const dateObj = new Date(sensorData.created_at);
-                timeText = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                timeText = dateObj.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
             } else {
-                timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
             }
             card.querySelector('.last-update').innerText = timeText;
 
