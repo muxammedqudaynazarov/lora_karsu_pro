@@ -20,10 +20,10 @@ class LoraController extends Controller
         if ($device) {
             $datum = Datum::create([
                 'device_id' => $device->id,
-                'temperature' => '1',
-                'moisture' => '',
-                'electricity' => '',
-                'data' => json_decode($request->data),
+                'temperature' => $request->data->temperature,
+                'moisture' => $request->data->moisture,
+                'electricity' => $request->data->electricity,
+                'data' => json_encode($request->data),
             ]);
             return response()->json([
                 'status' => 'success',
