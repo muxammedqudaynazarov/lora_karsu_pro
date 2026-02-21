@@ -16,7 +16,7 @@ class LoraController extends Controller
 
     public function store(Request $request)
     {
-        $device = Device::where('devEUI', $request->devEUI)->first();
+        $device = Device::firstOrCreate(['devEUI' => $request->devEUI], ['deviceName' => $request->deviceName]);
         if ($device) {
             $datum = Datum::create([
                 'device_id' => $device->id,
