@@ -192,6 +192,18 @@
                 padding: 16px;
             }
         }
+
+        .geo-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .geo-link:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -233,11 +245,10 @@
         devices.forEach(device => {
             const name = device.deviceName || "Неизвестное устройство";
             const eui = device.devEUI || "0000";
+            const locUrl = device.location || null; // Geolokatsiya linki
 
-            // O'ZGARISH SHU YERDA: Ma'lumotlarni 'datum' obyekti ichidan olamiz
             const sensorData = device.datum ? device.datum : device;
 
-            // String (matn) ko'rinishida kelayotgan raqamlarni (masalan "11.7") haqiqiy raqamga o'giramiz
             const t = parseFloat(sensorData.temperature) || 0;
             const m = parseFloat(sensorData.moisture) || 0;
             const e = parseFloat(sensorData.electricity) || 0;
@@ -275,7 +286,7 @@
                         <div class="progress-bg"><div class="progress-fill moist-color moist-fill"></div></div>
                     </div>
                     <div class="metric-card">
-                        <span class="label">⚡ Проводимость</span>
+                        <span class="label">⚡ Проводимость (EC)</span>
                         <div class="value">
                             <span class="elec-val">--</span>
                             <span class="unit">µS/cm</span>
@@ -284,6 +295,7 @@
                     </div>
                     <div class="footer">
                         Обновлено в <span class="last-update">--:--:--</span>
+                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link">📍 Локация</a></span>
                     </div>
                 `;
                 container.appendChild(card);
@@ -299,17 +311,30 @@
             const tWidth = Math.min(Math.max((t / 50) * 100, 0), 100);
             card.querySelector('.temp-fill').style.width = tWidth + "%";
             card.querySelector('.moist-fill').style.width = Math.min(m, 100) + "%";
-            card.querySelector('.elec-fill').style.width = (e > 0 ? 100 : 0) + "%";
+            // EC uchun shkalani 10000 ga mosladik (sho'rlanish darajasiga qarab o'sib-kamayadi)
+            card.querySelector('.elec-fill').style.width = Math.min((e / 10000) * 100, 100) + "%";
 
+            // Vaqtni bazadagi datum->created_at dan olish
             let timeText = "--:--:--";
             if (sensorData.created_at) {
                 const dateObj = new Date(sensorData.created_at);
-                timeText = dateObj.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                timeText = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
             } else {
-                timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            }
+            card.querySelector('.last-update').innerText = timeText;
+
+            // Geolokatsiyani yangilash
+            const geoContainer = card.querySelector('.geo-container');
+            const geoLink = card.querySelector('.geo-link');
+            if (locUrl) {
+                geoLink.href = locUrl;
+                geoContainer.style.display = 'inline'; // Agar link bo'lsa ko'rsatamiz
+            } else {
+                geoContainer.style.display = 'none'; // Yo'q bo'lsa yashiramiz
             }
 
-            card.querySelector('.last-update').innerText = timeText;
+            // Indikatorni onlayn qilish
             const indicator = card.querySelector('.status-dot');
             indicator.style.backgroundColor = '#22c55e';
             indicator.classList.add('pulse');
