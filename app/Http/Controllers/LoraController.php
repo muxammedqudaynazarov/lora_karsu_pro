@@ -10,7 +10,7 @@ class LoraController extends Controller
 {
     public function index()
     {
-        $devices = Device::with('latestDatum')->where('status', '1')->get();
+        $devices = Device::with('datum')->where('status', '1')->get();
         return response()->json($devices);
     }
 
