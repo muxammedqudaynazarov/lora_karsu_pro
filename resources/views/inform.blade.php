@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
     <title>Lora Devices Dashboard</title>
     <style>
         :root {
@@ -274,7 +275,7 @@
                         <div class="progress-bg"><div class="progress-fill moist-color moist-fill"></div></div>
                     </div>
                     <div class="metric-card">
-                        <span class="label">⚡ Электричество</span>
+                        <span class="label">⚡ Проводимость</span>
                         <div class="value">
                             <span class="elec-val">--</span>
                             <span class="unit">µS/cm</span>
