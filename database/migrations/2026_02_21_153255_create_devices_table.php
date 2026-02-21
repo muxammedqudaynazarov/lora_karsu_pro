@@ -7,20 +7,17 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('loras', function (Blueprint $table) {
+        Schema::create('devices', function (Blueprint $table) {
             $table->id();
             $table->string('deviceName');
             $table->string('devEUI');
-            $table->string('electricity');
-            $table->string('moisture');
-            $table->string('temperature');
-            $table->json('data');
+            $table->enum('status', ['0', '1', '2'])->default('1');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('loras');
+        Schema::dropIfExists('devices');
     }
 };

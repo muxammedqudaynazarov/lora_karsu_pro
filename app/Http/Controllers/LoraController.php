@@ -2,26 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Lora;
+use App\Models\Datum;
+use App\Models\Device;
 use Illuminate\Http\Request;
 
 class LoraController extends Controller
 {
     public function index()
     {
-        $lora = Lora::orderBy('id', 'DESC')->first();
-        return json_decode($lora->data);
+        $devices = Device::with('latestDatum')->where('status', '1')->get();
+        return response()->json($devices);
     }
 
     public function store(Request $request)
     {
-        $lora = new Lora();
-        $lora->deviceName = $request->deviceName;
-        $lora->devEUI = $request->devEUI;
-        $lora->electricity = $request->electricity;
-        $lora->moisture = $request->moisture;
-        $lora->temperature = $request->temperature;
-        $lora->data = json_encode($request->all());
-        $lora->save();
+        $device = Device::where('devEUI', $request->devEUI)->first();
+        if ($device) {
+            $datum = Datum::create([
+                'device_id' => $device->id,
+                'temperature' => $request->temperature,
+                'moisture' => $request->moisture,
+                'electricity' => $request->electricity,
+                'data' => json_decode($request->data),
+            ]);
+            return response()->json([
+                'status' => 'success',
+                'data' => $datum
+            ]);
+        }
+        return response()->json(['status' => false]);
     }
 }
