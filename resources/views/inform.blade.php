@@ -131,9 +131,20 @@
             transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .temp-color { background: var(--accent-red); box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
-        .moist-color { background: var(--accent-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-        .elec-color { background: var(--accent-yellow); box-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
+        .temp-color {
+            background: var(--accent-red);
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+        }
+
+        .moist-color {
+            background: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .elec-color {
+            background: var(--accent-yellow);
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
+        }
 
         .footer {
             text-align: center;
@@ -149,8 +160,12 @@
         }
 
         @keyframes pulse-animation {
-            0% { box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4); }
-            100% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            0% {
+                box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
         }
 
         #global-error-msg {
@@ -168,8 +183,13 @@
         }
 
         @media (max-width: 360px) {
-            .value { font-size: 1.6rem; }
-            .dashboard { padding: 16px; }
+            .value {
+                font-size: 1.6rem;
+            }
+
+            .dashboard {
+                padding: 16px;
+            }
         }
     </style>
 </head>
@@ -257,7 +277,7 @@
                         <span class="label">⚡ Электричество</span>
                         <div class="value">
                             <span class="elec-val">--</span>
-                            <span class="unit">kWh</span>
+                            <span class="unit">µS/cm</span>
                         </div>
                         <div class="progress-bg"><div class="progress-fill elec-color elec-fill"></div></div>
                     </div>
@@ -280,8 +300,15 @@
             card.querySelector('.moist-fill').style.width = Math.min(m, 100) + "%";
             card.querySelector('.elec-fill').style.width = (e > 0 ? 100 : 0) + "%";
 
-            card.querySelector('.last-update').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            let timeText = "--:--:--";
+            if (sensorData.created_at) {
+                const dateObj = new Date(sensorData.created_at);
+                timeText = dateObj.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            } else {
+                timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            }
 
+            card.querySelector('.last-update').innerText = timeText;
             const indicator = card.querySelector('.status-dot');
             indicator.style.backgroundColor = '#22c55e';
             indicator.classList.add('pulse');
