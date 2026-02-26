@@ -27,7 +27,6 @@
             min-height: 100vh;
         }
 
-        /* Barcha qurilmalarni ushlab turuvchi asosiy konteyner */
         .app-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -46,6 +45,14 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dashboard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .header {
@@ -207,12 +214,9 @@
     </style>
 </head>
 <body>
-
 <div id="global-error-msg">⚠️ Ошибка подключения к серверу или обновления данных</div>
-
 <div id="app-container" class="app-container">
 </div>
-
 <script>
     const API_URL = 'https://wan.nmtu.uz/api/lora/get';
     const container = document.getElementById('app-container');
@@ -223,17 +227,12 @@
             const response = await fetch(`${API_URL}?nocache=${Date.now()}`);
             if (!response.ok) throw new Error('API Error');
             const data = await response.json();
-
-            // Kelayotgan ma'lumot massiv ekanligiga ishonch hosil qilish
             const devices = Array.isArray(data) ? data : [data];
-
             updateUI(devices);
             globalError.style.display = 'none';
         } catch (error) {
             console.error('Data Fetch Error:', error);
             globalError.style.display = 'block';
-
-            // Xato bo'lganda barcha datchiklardagi yashil chiroqni qizilga o'tkazish
             document.querySelectorAll('.status-dot').forEach(dot => {
                 dot.style.backgroundColor = '#f43f5e';
                 dot.classList.remove('pulse');
@@ -245,14 +244,11 @@
         devices.forEach(device => {
             const name = device.deviceName || "Неизвестное устройство";
             const eui = device.devEUI || "0000";
-            const locUrl = device.location || null; // Geolokatsiya linki
-
+            const locUrl = device.location || null;
             const sensorData = device.datum ? device.datum : device;
-
             const t = parseFloat(sensorData.temperature) || 0;
             const m = parseFloat(sensorData.moisture) || 0;
             const e = parseFloat(sensorData.electricity) || 0;
-
             const cardId = `device-${eui}`;
             let card = document.getElementById(cardId);
 
@@ -260,7 +256,9 @@
                 card = document.createElement('div');
                 card.className = 'dashboard';
                 card.id = cardId;
-
+                card.onclick = () => {
+                    window.location.href = `/data/${eui}`;
+                };
                 card.innerHTML = `
                     <div class="header">
                         <h2 class="dev-name">${name}</h2>
@@ -295,26 +293,19 @@
                     </div>
                     <div class="footer">
                         Обновлено в <span class="last-update">--:--:--</span>
-                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link" style="color: color: #475569;">Локация</a></span>
+                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link" onclick="event.stopPropagation();" style="color: #475569;">Локация</a></span>
                     </div>
                 `;
                 container.appendChild(card);
             }
-
-            // Kartadagi ma'lumotlarni yangilash
             card.querySelector('.dev-name').innerText = name;
             card.querySelector('.temp-val').innerText = t;
             card.querySelector('.moist-val').innerText = m;
             card.querySelector('.elec-val').innerText = e;
-
-            // Progres barlarni hisoblash
             const tWidth = Math.min(Math.max((t / 50) * 100, 0), 100);
             card.querySelector('.temp-fill').style.width = tWidth + "%";
             card.querySelector('.moist-fill').style.width = Math.min(m, 100) + "%";
-            // EC uchun shkalani 10000 ga mosladik (sho'rlanish darajasiga qarab o'sib-kamayadi)
             card.querySelector('.elec-fill').style.width = Math.min((e / 10000) * 100, 100) + "%";
-
-            // Vaqtni bazadagi datum->created_at dan olish
             let timeText = "--:--:--";
             if (sensorData.created_at) {
                 const dateObj = new Date(sensorData.created_at);
@@ -323,25 +314,20 @@
                 timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
             }
             card.querySelector('.last-update').innerText = timeText;
-
-            // Geolokatsiyani yangilash
             const geoContainer = card.querySelector('.geo-container');
             const geoLink = card.querySelector('.geo-link');
             if (locUrl) {
                 geoLink.href = locUrl;
-                geoContainer.style.display = 'inline'; // Agar link bo'lsa ko'rsatamiz
+                geoContainer.style.display = 'inline';
             } else {
-                geoContainer.style.display = 'none'; // Yo'q bo'lsa yashiramiz
+                geoContainer.style.display = 'none';
             }
-
-            // Indikatorni onlayn qilish
             const indicator = card.querySelector('.status-dot');
             indicator.style.backgroundColor = '#22c55e';
             indicator.classList.add('pulse');
         });
     }
 
-    // Dastlabki ishga tushirish va har 30 soniyada takrorlash
     fetchData();
     setInterval(fetchData, 15000);
 </script>

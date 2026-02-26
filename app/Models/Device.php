@@ -20,4 +20,9 @@ class Device extends Model
     {
         return $this->hasOne(Datum::class)->latestOfMany();
     }
+
+    public function data()
+    {
+        return $this->hasMany(Datum::class, 'device_id', 'id');
+    }
 }
