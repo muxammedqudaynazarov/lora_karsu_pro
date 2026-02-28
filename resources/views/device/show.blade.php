@@ -17,6 +17,8 @@
             --accent-blue: #3b82f6;
             --accent-yellow: #eab308;
             --accent-green: #22c55e;
+            --accent-purple: #a855f7; /* Yorug'lik uchun yangi rang */
+            --accent-cyan: #06b6d4;   /* Chuqurlik uchun yangi rang */
             --border: rgba(255, 255, 255, 0.05);
         }
 
@@ -47,9 +49,7 @@
             transition: color 0.2s;
         }
 
-        .back-btn:hover {
-            color: var(--text);
-        }
+        .back-btn:hover { color: var(--text); }
 
         .info-grid {
             display: grid;
@@ -89,15 +89,8 @@
             border-radius: 50%;
             margin-right: 6px;
         }
-
-        .status-active {
-            background-color: var(--accent-green);
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
-        }
-
-        .status-inactive {
-            background-color: var(--text-muted);
-        }
+        .status-active { background-color: var(--accent-green); box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+        .status-inactive { background-color: var(--text-muted); }
 
         /* Chart Sections */
         .chart-container {
@@ -117,11 +110,7 @@
             justify-content: space-between;
         }
 
-        .chart-title {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+        .chart-title { margin: 0; font-size: 1.1rem; font-weight: 600; }
 
         .mini-charts-grid {
             display: grid;
@@ -130,24 +119,12 @@
             margin-bottom: 24px;
         }
 
-        .mini-charts-grid .chart-container {
-            margin-bottom: 0;
-        }
+        .mini-charts-grid .chart-container { margin-bottom: 0; }
 
-        .canvas-wrapper-main {
-            position: relative;
-            height: 40vh;
-            min-height: 300px;
-            width: 100%;
-        }
+        .canvas-wrapper-main { position: relative; height: 40vh; min-height: 300px; width: 100%; }
+        .canvas-wrapper-mini { position: relative; height: 20vh; min-height: 180px; width: 100%; }
 
-        .canvas-wrapper-mini {
-            position: relative;
-            height: 20vh;
-            min-height: 180px;
-            width: 100%;
-        }
-
+        /* Table Section */
         .table-container {
             background: var(--card);
             border: 1px solid var(--border);
@@ -156,57 +133,15 @@
             overflow-x: auto;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-size: 0.9rem;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .t-red {
-            color: var(--accent-red);
-            font-weight: 600;
-        }
-
-        .t-blue {
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-
-        .t-yellow {
-            color: var(--accent-yellow);
-            font-weight: 600;
-        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.02); font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
         @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .canvas-wrapper-main {
-                height: 35vh;
-            }
+            .info-grid { grid-template-columns: 1fr 1fr; }
+            .canvas-wrapper-main { height: 35vh; }
         }
     </style>
 </head>
@@ -214,6 +149,7 @@
 
 <div class="container">
     <a href="javascript:history.back()" class="back-btn">← Назад к списку</a>
+
     <div class="info-grid">
         <div class="info-card">
             <span class="info-label">Устройство</span>
@@ -234,8 +170,7 @@
             <span class="info-label">Локация</span>
             <h3 class="info-value">
                 @if($device->location)
-                    <a href="{{ $device->location }}" target="_blank"
-                       style="color: var(--primary); text-decoration: none;">На карте</a>
+                    <a href="{{ $device->location }}" target="_blank" style="color: var(--primary); text-decoration: none;">На карте</a>
                 @else
                     Нет данных
                 @endif
@@ -243,7 +178,7 @@
         </div>
     </div>
 
-    <div class="chart-container">
+    <div class="chart-container" id="main-chart-container" style="display: none;">
         <div class="chart-header">
             <h2 class="chart-title">Общая динамика показателей</h2>
         </div>
@@ -251,56 +186,18 @@
             <canvas id="mainChart"></canvas>
         </div>
     </div>
-    <div class="mini-charts-grid">
-        <div class="chart-container">
-            <div class="chart-header" style="justify-content: flex-start;">
-                <span style="font-size: 1.2rem;">🌡️</span>
-                <h2 class="chart-title" style="color: var(--accent-red); font-size: 1rem;">Температура</h2>
-            </div>
-            <div class="canvas-wrapper-mini">
-                <canvas id="tempChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-container">
-            <div class="chart-header" style="justify-content: flex-start;">
-                <span style="font-size: 1.2rem;">💧</span>
-                <h2 class="chart-title" style="color: var(--accent-blue); font-size: 1rem;">Влажность</h2>
-            </div>
-            <div class="canvas-wrapper-mini">
-                <canvas id="moistChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-container">
-            <div class="chart-header" style="justify-content: flex-start;">
-                <span style="font-size: 1.2rem;">⚡</span>
-                <h2 class="chart-title" style="color: var(--accent-yellow); font-size: 1rem;">Проводимость</h2>
-            </div>
-            <div class="canvas-wrapper-mini">
-                <canvas id="elecChart"></canvas>
-            </div>
-        </div>
 
+    <div class="mini-charts-grid" id="mini-charts-container">
     </div>
-    <div class="table-container">
+
+    <div class="table-container" id="table-container" style="display: none;">
         <h2 class="chart-title" style="margin-bottom: 16px;">История данных</h2>
-        <table>
+        <table id="data-table">
             <thead>
             <tr>
-                <th>Время</th>
-                <th style="text-align: center; width: 15%">Температура (°C)</th>
-                <th style="text-align: center; width: 15%">Влажность (%)</th>
-                <th style="text-align: center; width: 15%">Проводимость (µS/cm)</th>
             </tr>
             </thead>
             <tbody>
-            @foreach($device->data->reverse()->take(20) as $item)
-                <tr>
-                    <td>{{ \Carbon\Carbon::parse($item->created_at)->format('H:i | d.m.Y') }}</td>
-                    <td class="t-red" style="text-align: center">{{ $item->temperature }}</td>
-                    <td class="t-blue" style="text-align: center">{{ $item->moisture }}</td>
-                    <td class="t-yellow" style="text-align: center">{{ $item->electricity }}</td>
-                </tr>
-            @endforeach
             </tbody>
         </table>
     </div>
@@ -308,139 +205,192 @@
 </div>
 
 <script>
+    // 1. Ma'lumotlarni qabul qilish
     const rawData = @json($device->data);
 
-    // CSS ranglarni o'qish
-    const style = getComputedStyle(document.body);
-    const colorRed = style.getPropertyValue('--accent-red').trim();
-    const colorBlue = style.getPropertyValue('--accent-blue').trim();
-    const colorYellow = style.getPropertyValue('--accent-yellow').trim();
-    const colorText = style.getPropertyValue('--text-muted').trim();
-    const colorGrid = style.getPropertyValue('--border').trim();
-    const colorBg = style.getPropertyValue('--card').trim();
+    if (!rawData || rawData.length === 0) {
+        document.getElementById('mini-charts-container').innerHTML = '<div style="color: #94a3b8;">Нет данных для отображения</div>';
+    } else {
+        document.getElementById('main-chart-container').style.display = 'block';
+        document.getElementById('table-container').style.display = 'block';
 
-    // Data tahlili
-    const labels = rawData.map(item => {
-        let date = new Date(item.created_at);
-        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    });
-    const tempData = rawData.map(item => item.temperature);
-    const moistData = rawData.map(item => item.moisture);
-    const elecData = rawData.map(item => item.electricity);
+        // 2. CSS Ranglarni o'qish
+        const style = getComputedStyle(document.body);
+        const colorText = style.getPropertyValue('--text-muted').trim();
+        const colorGrid = style.getPropertyValue('--border').trim();
 
-    // Global Chart sozlamalari
-    Chart.defaults.color = colorText;
-    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(30, 41, 59, 0.9)';
-    Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
-    Chart.defaults.plugins.tooltip.bodyColor = '#f8fafc';
+        // 3. Metrikalar sozlamalari (Datchik tipiga qarab)
+        const metricsConfig = {
+            temperature: { label: 'Температура', unit: '°C', color: style.getPropertyValue('--accent-red').trim(), icon: '🌡️', axis: 'y' },
+            moisture: { label: 'Влажность', unit: '%', color: style.getPropertyValue('--accent-blue').trim(), icon: '💧', axis: 'y' },
+            electricity: { label: 'Проводимость', unit: 'µS/cm', color: style.getPropertyValue('--accent-yellow').trim(), icon: '⚡', axis: 'y1' },
+            illumination: { label: 'Освещенность', unit: 'Lux', color: style.getPropertyValue('--accent-purple').trim(), icon: '☀️', axis: 'y1' },
+            depth: { label: 'Глубина', unit: 'м', color: style.getPropertyValue('--accent-cyan').trim(), icon: '📏', axis: 'y' }
+        };
 
-    // ==========================================
-    // 1. KATTA UMUMIY CHART (MAIN)
-    // ==========================================
-    new Chart(document.getElementById('mainChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Температура (°C)',
-                    data: tempData,
-                    borderColor: colorRed,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 2,
-                    tension: 0.4,
-                    yAxisID: 'y' // Chap o'q
-                },
-                {
-                    label: 'Влажность (%)',
-                    data: moistData,
-                    borderColor: colorBlue,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 2,
-                    tension: 0.4,
-                    yAxisID: 'y' // Chap o'q
-                },
-                {
-                    label: 'Проводимость (EC)',
-                    data: elecData,
-                    borderColor: colorYellow,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 2,
-                    tension: 0.4,
-                    yAxisID: 'y1' // O'ng o'q (kattaroq raqamlar uchun)
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {mode: 'index', intersect: false},
-            plugins: {
-                legend: {position: 'top', labels: {usePointStyle: true, boxWidth: 8}}
-            },
-            scales: {
-                x: {grid: {color: colorGrid, drawBorder: false}},
-                y: {
-                    type: 'linear', position: 'left',
-                    grid: {color: colorGrid, drawBorder: false},
-                    title: {display: true, text: 'Темп. / Влажн.'}
-                },
-                y1: {
-                    type: 'linear', position: 'right',
-                    grid: {drawOnChartArea: false},
-                    title: {display: true, text: 'Проводимость'}
-                }
+        // 4. Ma'lumotlarni tozalash va bor metrikalarni aniqlash
+        const activeMetrics = new Set();
+        const processedData = rawData.map(item => {
+            // Agar JSON array bo'lsa (yangi kiritilgan usul asosida) obj qilib olamiz
+            let parsedData = {};
+            if (typeof item.data === 'object' && item.data !== null) {
+                parsedData = item.data;
+            } else if (typeof item.data === 'string') {
+                try { parsedData = JSON.parse(item.data); } catch(e){}
             }
-        }
-    });
 
-    // ==========================================
-    // 2. KICHIK ALOHIDA CHARTLAR UCHUN FUNKSIYA
-    // ==========================================
-    function createMiniChart(ctx, label, data, color) {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: label,
-                    data: data,
-                    borderColor: color,
-                    backgroundColor: color + '15', // Shaffofroq bo'yash (15%)
+            // Qiymatlarni tekshirib olish (bazadagi ustundan yeki data ichidan)
+            const row = {
+                created_at: item.created_at,
+                temperature: item.temperature ?? parsedData.temperature,
+                moisture: item.moisture ?? parsedData.moisture,
+                electricity: item.electricity ?? parsedData.electricity,
+                illumination: item.illumination ?? parsedData.illumination,
+                depth: item.depth ?? parsedData.depth
+            };
+
+            // Qaysi metrikalar kelsa, shuni ro'yxatga qo'shamiz
+            Object.keys(metricsConfig).forEach(key => {
+                if (row[key] !== undefined && row[key] !== null) {
+                    activeMetrics.add(key);
+                }
+            });
+
+            return row;
+        });
+
+        const activeMetricsArray = Array.from(activeMetrics); // Masalan: ['illumination'] yoki ['temperature', 'moisture', 'electricity']
+
+        // Global Chart.js sozlamalari
+        Chart.defaults.color = colorText;
+        Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(30, 41, 59, 0.9)';
+        Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
+        Chart.defaults.plugins.tooltip.bodyColor = '#f8fafc';
+
+        const labels = processedData.map(item => {
+            let date = new Date(item.created_at);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        });
+
+        // 5. KICHIK GRAFIKLARNI YARATISH
+        const miniContainer = document.getElementById('mini-charts-container');
+        activeMetricsArray.forEach(key => {
+            const config = metricsConfig[key];
+            const canvasId = `chart_${key}`;
+
+            // HTML chizish
+            miniContainer.innerHTML += `
+                <div class="chart-container">
+                    <div class="chart-header" style="justify-content: flex-start;">
+                        <span style="font-size: 1.2rem;">${config.icon}</span>
+                        <h2 class="chart-title" style="color: ${config.color}; font-size: 1rem;">${config.label}</h2>
+                    </div>
+                    <div class="canvas-wrapper-mini">
+                        <canvas id="${canvasId}"></canvas>
+                    </div>
+                </div>
+            `;
+        });
+
+        // HTML DOM ga yozilgandan so'ng, Chart larni initsializatsiya qilish
+        setTimeout(() => {
+            const mainDatasets = [];
+            let useY1 = false; // O'ng tomon o'qini yoqish/o'chirish uchun
+
+            activeMetricsArray.forEach(key => {
+                const config = metricsConfig[key];
+                const dataValues = processedData.map(item => item[key]);
+
+                // Asosiy grafik uchun dataset
+                mainDatasets.push({
+                    label: `${config.label} (${config.unit})`,
+                    data: dataValues,
+                    borderColor: config.color,
+                    backgroundColor: 'transparent',
                     borderWidth: 2,
-                    pointRadius: 0, // Kichik chartda nuqtalar chalg'itmasligi uchun yashiramiz
-                    pointHoverRadius: 4,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {mode: 'index', intersect: false},
-                plugins: {
-                    legend: {display: false}, // Legend keraksiz
-                    tooltip: {displayColors: false}
-                },
-                scales: {
-                    x: {display: false}, // Kichik chartda pastki vaqt yozuvlari kerak emas, toza turadi
-                    y: {
-                        grid: {color: colorGrid, drawBorder: false},
-                        ticks: {maxTicksLimit: 5} // O'qdagi raqamlar sonini kamaytirish
+                    pointRadius: 2,
+                    tension: 0.4,
+                    yAxisID: config.axis
+                });
+
+                if (config.axis === 'y1') useY1 = true;
+
+                // Kichik grafikni chizish
+                new Chart(document.getElementById(`chart_${key}`).getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: config.label,
+                            data: dataValues,
+                            borderColor: config.color,
+                            backgroundColor: config.color + '15',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        interaction: {mode: 'index', intersect: false},
+                        plugins: { legend: {display: false}, tooltip: {displayColors: false} },
+                        scales: {
+                            x: {display: false},
+                            y: { grid: {color: colorGrid, drawBorder: false}, ticks: {maxTicksLimit: 5} }
+                        }
+                    }
+                });
+            });
+
+            // Asosiy (katta) chartni chizish
+            const y1Scale = useY1 ? { type: 'linear', position: 'right', grid: {drawOnChartArea: false} } : { display: false };
+
+            new Chart(document.getElementById('mainChart').getContext('2d'), {
+                type: 'line',
+                data: { labels: labels, datasets: mainDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: {mode: 'index', intersect: false},
+                    plugins: { legend: {position: 'top', labels: {usePointStyle: true, boxWidth: 8}} },
+                    scales: {
+                        x: {grid: {color: colorGrid, drawBorder: false}},
+                        y: { type: 'linear', position: 'left', grid: {color: colorGrid, drawBorder: false} },
+                        y1: y1Scale
                     }
                 }
-            }
+            });
+        }, 50);
+
+        // 6. JADVALNI YARATISH (Faqat mavjud ma'lumotlar bilan)
+        const theadTr = document.querySelector('#data-table thead tr');
+        theadTr.innerHTML = '<th>Время</th>';
+        activeMetricsArray.forEach(key => {
+            theadTr.innerHTML += `<th style="text-align: center;">${metricsConfig[key].label} (${metricsConfig[key].unit})</th>`;
+        });
+
+        const tbody = document.querySelector('#data-table tbody');
+        // Oxirgi 20 tasini jadval tepasida ko'rsatish uchun ro'yxatni teskari aylantiramiz
+        const tableData = [...processedData].reverse().slice(0, 20);
+
+        tableData.forEach(item => {
+            let tr = document.createElement('tr');
+            let date = new Date(item.created_at);
+            let timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ' | ' + date.toLocaleDateString('ru-RU');
+
+            let rowHtml = `<td>${timeStr}</td>`;
+
+            activeMetricsArray.forEach(key => {
+                let val = item[key] !== undefined && item[key] !== null ? item[key] : '--';
+                rowHtml += `<td style="text-align: center; color: ${metricsConfig[key].color}; font-weight: 600;">${val}</td>`;
+            });
+
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
         });
     }
-
-    createMiniChart(document.getElementById('tempChart').getContext('2d'), 'Темп.', tempData, colorRed);
-    createMiniChart(document.getElementById('moistChart').getContext('2d'), 'Влажн.', moistData, colorBlue);
-    createMiniChart(document.getElementById('elecChart').getContext('2d'), 'Пров.', elecData, colorYellow);
-
 </script>
 
 </body>
