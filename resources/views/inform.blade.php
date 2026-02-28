@@ -254,61 +254,55 @@
 
     function updateUI(devices) {
         devices.forEach(device => {
-            const name = device.deviceName || "Неизвестное устройство";
+            const name = device.deviceName || "Неизвестное... ";
             const eui = device.devEUI || "0000";
             const locUrl = device.location || null;
 
-            // Backend "datum" obyektida yoki to'g'ridan-to'g'ri ildizda saqlayotganini tekshirish
-            const sensorData = device.datum ? device.datum : device;
+            // API strukturasi: device.datum.data ichida sensor qiymatlari bor
+            // Agar datum yoki data bo'lmasa, bo'sh obyekt olamiz
+            const sensorData = (device.datum && device.datum.data) ? device.datum.data : {};
+
             const cardId = `device-${eui}`;
 
-            // Vaqtni hisoblash
+            // Vaqtni olish (datum.created_at dan)
             let timeText = "--:--:--";
-            if (sensorData.created_at) {
-                const dateObj = new Date(sensorData.created_at);
+            if (device.datum && device.datum.created_at) {
+                const dateObj = new Date(device.datum.created_at);
                 timeText = dateObj.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-            } else {
-                timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
             }
 
-            // ============================================
-            // 1. DINAMIK METRIKALARNI YIG'ISH
-            // ============================================
             let metricsHTML = '';
 
-            // Agar harorat bo'lsa
+            // 1. Harorat (SMTC qurilmalari uchun)
             if (sensorData.temperature !== undefined) {
-                metricsHTML += buildMetricCard('Температура', '🌡️', sensorData.temperature, '°C', 'color-temp', 50); // Maks 50 gradus faraz qilinadi
+                metricsHTML += buildMetricCard('Температура', '🌡️', sensorData.temperature, '°C', 'color-temp', 50);
             }
 
-            // Agar namlik bo'lsa
+            // 2. Namlik (SMTC qurilmalari uchun)
             if (sensorData.moisture !== undefined) {
-                metricsHTML += buildMetricCard('Влажность', '💧', sensorData.moisture, '%', 'color-moist', 100); // 100% gacha
+                metricsHTML += buildMetricCard('Влажность', '💧', sensorData.moisture, '%', 'color-moist', 100);
             }
 
-            // Agar elektr o'tkazuvchanlik bo'lsa
+            // 3. Elektr o'tkazuvchanlik (EC)
             if (sensorData.electricity !== undefined) {
-                metricsHTML += buildMetricCard('Проводимость (EC)', '⚡', sensorData.electricity, 'µS/cm', 'color-elec', 10000);
+                metricsHTML += buildMetricCard('Проводимость', '⚡', sensorData.electricity, 'µS/cm', 'color-elec', 1000);
             }
 
-            // Agar yorug'lik (LGT-1) bo'lsa
+            // 4. Yorug'lik (LGT-1 qurilmasi uchun)
             if (sensorData.illumination !== undefined) {
-                metricsHTML += buildMetricCard('Освещенность', '☀️', sensorData.illumination, 'Lux', 'color-illum', 2000); // Quyoshli kunda 2000 gacha yetishi mumkin
+                metricsHTML += buildMetricCard('Освещенность', '☀️', sensorData.illumination, 'Lux', 'color-illum', 2000);
             }
 
-            // Agar chuqurlik (SWL-1) bo'lsa
+            // 5. Chuqurlik (SWL-1 qurilmasi uchun)
             if (sensorData.depth !== undefined) {
-                metricsHTML += buildMetricCard('Глубина / Уровень', '📏', sensorData.depth, 'м', 'color-depth', 5); // Masalan 5 metrgacha
+                metricsHTML += buildMetricCard('Глубина', '📏', sensorData.depth, 'м', 'color-depth', 5);
             }
 
-            // Agar umuman hech qanday ma'lumot kelmasa
             if(metricsHTML === '') {
-                metricsHTML = `<div style="text-align:center; color: #64748b; padding: 20px;">Нет данных с датчиков</div>`;
+                metricsHTML = `<div style="text-align:center; color: #64748b; padding: 20px;">Нет данных</div>`;
             }
 
-            // ============================================
-            // 2. KARTANI DOM-ga JOYLASHTIRISH
-            // ============================================
+            // Karta yaratish yoki yangilash
             let card = document.getElementById(cardId);
             if (!card) {
                 card = document.createElement('div');
@@ -318,7 +312,6 @@
                 container.appendChild(card);
             }
 
-            // Kartaning to'liq ichki HTML tuzilishini qaytadan yozamiz
             card.innerHTML = `
                 <div class="header">
                     <h2 class="dev-name">${name}</h2>
@@ -327,14 +320,10 @@
                         <small class="dev-eui">ID: ${eui}</small>
                     </div>
                 </div>
-
-                <div class="metrics-container">
-                    ${metricsHTML}
-                </div>
-
+                <div class="metrics-container">${metricsHTML}</div>
                 <div class="footer">
-                    Обновлено в <span>${timeText}</span>
-                    ${locUrl ? `<span style="display:inline;"> | <a href="${locUrl}" target="_blank" class="geo-link" onclick="event.stopPropagation();">Локация</a></span>` : ''}
+                    Обновлено: <span>${timeText}</span>
+                    ${locUrl ? ` | <a href="${locUrl}" target="_blank" class="geo-link" onclick="event.stopPropagation();">Локация</a>` : ''}
                 </div>
             `;
         });
