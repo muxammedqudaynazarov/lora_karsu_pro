@@ -16,6 +16,8 @@
             --accent-red: #f43f5e;
             --accent-blue: #3b82f6;
             --accent-yellow: #eab308;
+            --accent-purple: #a855f7;
+            --accent-cyan: #06b6d4;
             --accent-green: #22c55e;
             --border: rgba(255, 255, 255, 0.05);
         }
@@ -27,193 +29,65 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
             min-height: 100vh;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1400px; margin: 0 auto; }
 
         .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 24px;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .back-btn:hover {
-            color: var(--text);
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--text-muted); text-decoration: none;
+            margin-bottom: 24px; font-size: 0.9rem;
         }
 
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 16px; margin-bottom: 24px;
         }
 
         .info-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 20px;
         }
 
-        .info-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-            display: block;
-        }
+        .info-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .info-value { font-size: 1.25rem; font-weight: 700; margin: 0; }
 
-        .info-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text);
-            margin: 0;
-        }
+        .status-dot { display: inline-block; height: 10px; width: 10px; border-radius: 50%; margin-right: 6px; }
+        .status-active { background-color: var(--accent-green); box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
 
-        .status-dot {
-            display: inline-block;
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .status-active {
-            background-color: var(--accent-green);
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
-        }
-
-        .status-inactive {
-            background-color: var(--text-muted);
-        }
-
-        /* Chart Sections */
         .chart-container {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            margin-bottom: 24px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 24px; margin-bottom: 24px;
         }
 
-        .chart-header {
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            justify-content: space-between;
-        }
-
-        .chart-title {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+        .chart-title { margin: 0; font-size: 1.1rem; font-weight: 600; }
 
         .mini-charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 24px;
+            gap: 24px; margin-bottom: 24px;
         }
 
-        .mini-charts-grid .chart-container {
-            margin-bottom: 0;
-        }
-
-        .canvas-wrapper-main {
-            position: relative;
-            height: 40vh;
-            min-height: 300px;
-            width: 100%;
-        }
-
-        .canvas-wrapper-mini {
-            position: relative;
-            height: 20vh;
-            min-height: 180px;
-            width: 100%;
-        }
+        .canvas-wrapper-main { position: relative; height: 40vh; min-height: 300px; width: 100%; }
+        .canvas-wrapper-mini { position: relative; height: 20vh; min-height: 180px; width: 100%; }
 
         .table-container {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 24px;
-            overflow-x: auto;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 24px; overflow-x: auto;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-size: 0.9rem;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .t-red {
-            color: var(--accent-red);
-            font-weight: 600;
-        }
-
-        .t-blue {
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-
-        .t-yellow {
-            color: var(--accent-yellow);
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .canvas-wrapper-main {
-                height: 35vh;
-            }
-        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.02); font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <a href="javascript:history.back()" class="back-btn">← Назад к списку</a>
+
     <div class="info-grid">
         <div class="info-card">
             <span class="info-label">Устройство</span>
@@ -226,16 +100,15 @@
         <div class="info-card">
             <span class="info-label">Статус</span>
             <h3 class="info-value">
-                <span class="status-dot {{ $device->status == '1' ? 'status-active' : 'status-inactive' }}"></span>
-                {{ ucfirst($device->status == '1' ? 'Online' : 'Offline') }}
+                <span class="status-dot status-active"></span>
+                Online
             </h3>
         </div>
         <div class="info-card">
             <span class="info-label">Локация</span>
             <h3 class="info-value">
                 @if($device->location)
-                    <a href="{{ $device->location }}" target="_blank"
-                       style="color: var(--primary); text-decoration: none;">На карте</a>
+                    <a href="{{ $device->location }}" target="_blank" style="color: var(--primary); text-decoration: none;">На карте</a>
                 @else
                     Нет данных
                 @endif
@@ -243,204 +116,121 @@
         </div>
     </div>
 
-    <div class="chart-container">
-        <div class="chart-header">
-            <h2 class="chart-title">Общая динамика показателей</h2>
+    <div id="chartsSection">
+        <div class="chart-container">
+            <div class="chart-header"><h2 class="chart-title">Общая динамика</h2></div>
+            <div class="canvas-wrapper-main"><canvas id="mainChart"></canvas></div>
         </div>
-        <div class="canvas-wrapper-main">
-            <canvas id="mainChart"></canvas>
-        </div>
+        <div class="mini-charts-grid" id="miniChartsGrid"></div>
     </div>
-    <div class="mini-charts-grid">
-        <div class="chart-container">
-            <div class="chart-header" style="justify-content: flex-start;">
-                <span style="font-size: 1.2rem;">🌡️</span>
-                <h2 class="chart-title" style="color: var(--accent-red); font-size: 1rem;">Температура</h2>
-            </div>
-            <div class="canvas-wrapper-mini">
-                <canvas id="tempChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-container">
-            <div class="chart-header" style="justify-content: flex-start;">
-                <span style="font-size: 1.2rem;">💧</span>
-                <h2 class="chart-title" style="color: var(--accent-blue); font-size: 1rem;">Влажность</h2>
-            </div>
-            <div class="canvas-wrapper-mini">
-                <canvas id="moistChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-container">
-            <div class="chart-header" style="justify-content: flex-start;">
-                <span style="font-size: 1.2rem;">⚡</span>
-                <h2 class="chart-title" style="color: var(--accent-yellow); font-size: 1rem;">Проводимость</h2>
-            </div>
-            <div class="canvas-wrapper-mini">
-                <canvas id="elecChart"></canvas>
-            </div>
-        </div>
 
-    </div>
     <div class="table-container">
         <h2 class="chart-title" style="margin-bottom: 16px;">История данных</h2>
-        <table>
+        <table id="historyTable">
             <thead>
-            <tr>
+            <tr id="tableHeader">
                 <th>Время</th>
-                <th style="text-align: center; width: 15%">Температура (°C)</th>
-                <th style="text-align: center; width: 15%">Влажность (%)</th>
-                <th style="text-align: center; width: 15%">Проводимость (µS/cm)</th>
             </tr>
             </thead>
-            <tbody>
-            @foreach($device->data->reverse()->take(20) as $item)
-                <tr>
-                    <td>{{ \Carbon\Carbon::parse($item->created_at)->format('H:i | d.m.Y') }}</td>
-                    <td class="t-red" style="text-align: center">{{ $item->temperature }}</td>
-                    <td class="t-blue" style="text-align: center">{{ $item->moisture }}</td>
-                    <td class="t-yellow" style="text-align: center">{{ $item->electricity }}</td>
-                </tr>
-            @endforeach
-            </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
-
 </div>
 
 <script>
-    const rawData = @json($device->data);
+    // Laravel'dan kelgan ma'lumotni to'g'ri formatga o'tkazamiz
+    // API'dan kelgan har bir $device->data ichida aslida {datum: {data: {...}}} bor
+    const rawData = @json($device->data).map(item => {
+        return {
+            timestamp: item.created_at,
+            values: (item.datum && item.datum.data) ? item.datum.data : item.data
+        };
+    }).reverse(); // Eng oxirgisi oxirida bo'lishi uchun (chart uchun)
 
-    // CSS ranglarni o'qish
-    const style = getComputedStyle(document.body);
-    const colorRed = style.getPropertyValue('--accent-red').trim();
-    const colorBlue = style.getPropertyValue('--accent-blue').trim();
-    const colorYellow = style.getPropertyValue('--accent-yellow').trim();
-    const colorText = style.getPropertyValue('--text-muted').trim();
-    const colorGrid = style.getPropertyValue('--border').trim();
-    const colorBg = style.getPropertyValue('--card').trim();
+    const labels = rawData.map(d => new Date(d.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}));
 
-    // Data tahlili
-    const labels = rawData.map(item => {
-        let date = new Date(item.created_at);
-        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    });
-    const tempData = rawData.map(item => item.temperature);
-    const moistData = rawData.map(item => item.moisture);
-    const elecData = rawData.map(item => item.electricity);
+    // Mavjud sensorlarni aniqlash
+    const availableKeys = [];
+    if (rawData.length > 0) {
+        const firstData = rawData[rawData.length - 1].values;
+        if ('temperature' in firstData) availableKeys.push({key: 'temperature', label: 'Температура', unit: '°C', color: '#f43f5e'});
+        if ('moisture' in firstData) availableKeys.push({key: 'moisture', label: 'Влажность', unit: '%', color: '#3b82f6'});
+        if ('electricity' in firstData) availableKeys.push({key: 'electricity', label: 'Проводимость', unit: 'µS/cm', color: '#eab308'});
+        if ('illumination' in firstData) availableKeys.push({key: 'illumination', label: 'Освещенность', unit: 'Lux', color: '#a855f7'});
+        if ('depth' in firstData) availableKeys.push({key: 'depth', label: 'Глубина', unit: 'м', color: '#06b6d4'});
+    }
 
-    // Global Chart sozlamalari
-    Chart.defaults.color = colorText;
-    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(30, 41, 59, 0.9)';
-    Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
-    Chart.defaults.plugins.tooltip.bodyColor = '#f8fafc';
-
-    // ==========================================
-    // 1. KATTA UMUMIY CHART (MAIN)
-    // ==========================================
-    new Chart(document.getElementById('mainChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Температура (°C)',
-                    data: tempData,
-                    borderColor: colorRed,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 2,
-                    tension: 0.4,
-                    yAxisID: 'y' // Chap o'q
-                },
-                {
-                    label: 'Влажность (%)',
-                    data: moistData,
-                    borderColor: colorBlue,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 2,
-                    tension: 0.4,
-                    yAxisID: 'y' // Chap o'q
-                },
-                {
-                    label: 'Проводимость (EC)',
-                    data: elecData,
-                    borderColor: colorYellow,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 2,
-                    tension: 0.4,
-                    yAxisID: 'y1' // O'ng o'q (kattaroq raqamlar uchun)
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {mode: 'index', intersect: false},
-            plugins: {
-                legend: {position: 'top', labels: {usePointStyle: true, boxWidth: 8}}
-            },
-            scales: {
-                x: {grid: {color: colorGrid, drawBorder: false}},
-                y: {
-                    type: 'linear', position: 'left',
-                    grid: {color: colorGrid, drawBorder: false},
-                    title: {display: true, text: 'Темп. / Влажн.'}
-                },
-                y1: {
-                    type: 'linear', position: 'right',
-                    grid: {drawOnChartArea: false},
-                    title: {display: true, text: 'Проводимость'}
-                }
-            }
-        }
+    // 1. Jadvalni to'ldirish
+    const tableHeader = document.getElementById('tableHeader');
+    availableKeys.forEach(s => {
+        const th = document.createElement('th');
+        th.innerText = `${s.label} (${s.unit})`;
+        th.style.textAlign = 'center';
+        tableHeader.appendChild(th);
     });
 
-    // ==========================================
-    // 2. KICHIK ALOHIDA CHARTLAR UCHUN FUNKSIYA
-    // ==========================================
-    function createMiniChart(ctx, label, data, color) {
-        new Chart(ctx, {
+    const tableBody = document.getElementById('tableBody');
+    [...rawData].reverse().slice(0, 20).forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(row.timestamp).toLocaleString()}</td>`;
+        availableKeys.forEach(s => {
+            const val = row.values[s.key] !== undefined ? row.values[s.key] : '-';
+            tr.innerHTML += `<td style="text-align:center; color:${s.color}; font-weight:600">${val}</td>`;
+        });
+        tableBody.appendChild(tr);
+    });
+
+    // 2. Kichik Chartlarni yaratish
+    const miniChartsGrid = document.getElementById('miniChartsGrid');
+    availableKeys.forEach(s => {
+        const container = document.createElement('div');
+        container.className = 'chart-container';
+        container.innerHTML = `
+            <div class="chart-header">
+                <h2 class="chart-title" style="color:${s.color}">${s.label}</h2>
+            </div>
+            <div class="canvas-wrapper-mini"><canvas id="chart-${s.key}"></canvas></div>
+        `;
+        miniChartsGrid.appendChild(container);
+
+        new Chart(document.getElementById(`chart-${s.key}`).getContext('2d'), {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: label,
-                    data: data,
-                    borderColor: color,
-                    backgroundColor: color + '15', // Shaffofroq bo'yash (15%)
-                    borderWidth: 2,
-                    pointRadius: 0, // Kichik chartda nuqtalar chalg'itmasligi uchun yashiramiz
-                    pointHoverRadius: 4,
+                    data: rawData.map(d => d.values[s.key]),
+                    borderColor: s.color,
+                    backgroundColor: s.color + '20',
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 0
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {mode: 'index', intersect: false},
-                plugins: {
-                    legend: {display: false}, // Legend keraksiz
-                    tooltip: {displayColors: false}
-                },
-                scales: {
-                    x: {display: false}, // Kichik chartda pastki vaqt yozuvlari kerak emas, toza turadi
-                    y: {
-                        grid: {color: colorGrid, drawBorder: false},
-                        ticks: {maxTicksLimit: 5} // O'qdagi raqamlar sonini kamaytirish
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
-    }
+    });
 
-    createMiniChart(document.getElementById('tempChart').getContext('2d'), 'Темп.', tempData, colorRed);
-    createMiniChart(document.getElementById('moistChart').getContext('2d'), 'Влажн.', moistData, colorBlue);
-    createMiniChart(document.getElementById('elecChart').getContext('2d'), 'Пров.', elecData, colorYellow);
+    // 3. Umumiy Asosiy Chart
+    const datasets = availableKeys.map(s => ({
+        label: s.label,
+        data: rawData.map(d => d.values[s.key]),
+        borderColor: s.color,
+        tension: 0.4,
+        yAxisID: (s.key === 'electricity' || s.key === 'illumination') ? 'y1' : 'y'
+    }));
 
+    new Chart(document.getElementById('mainChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { type: 'linear', position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } },
+                y1: { type: 'linear', position: 'right', grid: { display: false } }
+            }
+        }
+    });
 </script>
 
 </body>
