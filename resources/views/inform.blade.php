@@ -14,6 +14,8 @@
             --accent-red: #f43f5e;
             --accent-blue: #3b82f6;
             --accent-yellow: #eab308;
+            --accent-purple: #a855f7; /* Yorug'lik uchun yangi rang */
+            --accent-cyan: #06b6d4;   /* Chuqurlik uchun yangi rang */
         }
 
         body {
@@ -47,6 +49,7 @@
             flex-direction: column;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            min-height: 420px; /* Barcha kartalar bir xil bo'yi saqlanishi uchun */
         }
 
         .dashboard:hover {
@@ -85,11 +88,19 @@
             border-radius: 50%;
         }
 
+        /* Metriclar ro'yxati joylashadigan joy */
+        .metrics-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-grow: 1; /* Metriclar o'rtadagi bo'sh joyni to'ldirib turishi uchun */
+            justify-content: center;
+        }
+
         .metric-card {
             background: rgba(255, 255, 255, 0.03);
             padding: 18px;
             border-radius: 20px;
-            margin-bottom: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: background 0.2s;
         }
@@ -139,41 +150,27 @@
             transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .temp-color {
-            background: var(--accent-red);
-            box-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
-        }
-
-        .moist-color {
-            background: var(--accent-blue);
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-        }
-
-        .elec-color {
-            background: var(--accent-yellow);
-            box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
-        }
+        /* Maxsus ranglar */
+        .color-temp { background: var(--accent-red); box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
+        .color-moist { background: var(--accent-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .color-elec { background: var(--accent-yellow); box-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
+        .color-illum { background: var(--accent-purple); box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+        .color-depth { background: var(--accent-cyan); box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); }
 
         .footer {
             text-align: center;
             font-size: 0.75rem;
             color: #475569;
-            margin-top: auto;
+            margin-top: 24px;
             padding-top: 16px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .pulse {
-            animation: pulse-animation 2s infinite;
-        }
+        .pulse { animation: pulse-animation 2s infinite; }
 
         @keyframes pulse-animation {
-            0% {
-                box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4);
-            }
-            100% {
-                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-            }
+            0% { box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4); }
+            100% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
         }
 
         #global-error-msg {
@@ -191,13 +188,8 @@
         }
 
         @media (max-width: 360px) {
-            .value {
-                font-size: 1.6rem;
-            }
-
-            .dashboard {
-                padding: 16px;
-            }
+            .value { font-size: 1.6rem; }
+            .dashboard { padding: 16px; min-height: auto; }
         }
 
         .geo-link {
@@ -208,15 +200,14 @@
             transition: opacity 0.2s;
         }
 
-        .geo-link:hover {
-            opacity: 0.8;
-        }
+        .geo-link:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 <div id="global-error-msg">⚠️ Ошибка подключения к серверу или обновления данных</div>
 <div id="app-container" class="app-container">
 </div>
+
 <script>
     const API_URL = 'https://wan.nmtu.uz/api/lora/get';
     const container = document.getElementById('app-container');
@@ -240,72 +231,38 @@
         }
     }
 
+    // Yordamchi funksiya: Maxsus parametrlar asosida bitta metrika kartasining HTML-kodini generatsiya qilish
+    function buildMetricCard(label, icon, value, unit, colorClass, maxVal) {
+        // qiymat maxVal dan oshib ketsa ham, progress bar 100% dan oshmasligi uchun
+        let percent = (parseFloat(value) / maxVal) * 100;
+        if (percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
+
+        return `
+            <div class="metric-card">
+                <span class="label">${icon} ${label}</span>
+                <div class="value">
+                    <span>${value}</span>
+                    <span class="unit">${unit}</span>
+                </div>
+                <div class="progress-bg">
+                    <div class="progress-fill ${colorClass}" style="width: ${percent}%;"></div>
+                </div>
+            </div>
+        `;
+    }
+
     function updateUI(devices) {
         devices.forEach(device => {
             const name = device.deviceName || "Неизвестное устройство";
             const eui = device.devEUI || "0000";
             const locUrl = device.location || null;
-            const sensorData = device.datum ? device.datum : device;
-            const t = parseFloat(sensorData.temperature) || 0;
-            const m = parseFloat(sensorData.moisture) || 0;
-            const e = parseFloat(sensorData.electricity) || 0;
-            const cardId = `device-${eui}`;
-            let card = document.getElementById(cardId);
 
-            if (!card) {
-                card = document.createElement('div');
-                card.className = 'dashboard';
-                card.id = cardId;
-                card.onclick = () => {
-                    window.location.href = `/data/${eui}`;
-                };
-                card.innerHTML = `
-                    <div class="header">
-                        <h2 class="dev-name">${name}</h2>
-                        <div class="status-container">
-                            <span class="status-dot pulse"></span>
-                            <small class="dev-eui">ID: ${eui}</small>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <span class="label">🌡️ Температура</span>
-                        <div class="value">
-                            <span class="temp-val">--</span>
-                            <span class="unit">°C</span>
-                        </div>
-                        <div class="progress-bg"><div class="progress-fill temp-color temp-fill"></div></div>
-                    </div>
-                    <div class="metric-card">
-                        <span class="label">💧 Влажность</span>
-                        <div class="value">
-                            <span class="moist-val">--</span>
-                            <span class="unit">%</span>
-                        </div>
-                        <div class="progress-bg"><div class="progress-fill moist-color moist-fill"></div></div>
-                    </div>
-                    <div class="metric-card">
-                        <span class="label">⚡ Проводимость (EC)</span>
-                        <div class="value">
-                            <span class="elec-val">--</span>
-                            <span class="unit">µS/cm</span>
-                        </div>
-                        <div class="progress-bg"><div class="progress-fill elec-color elec-fill"></div></div>
-                    </div>
-                    <div class="footer">
-                        Обновлено в <span class="last-update">--:--:--</span>
-                        <span class="geo-container" style="display: none;"> | <a href="#" target="_blank" class="geo-link" onclick="event.stopPropagation();" style="color: #475569;">Локация</a></span>
-                    </div>
-                `;
-                container.appendChild(card);
-            }
-            card.querySelector('.dev-name').innerText = name;
-            card.querySelector('.temp-val').innerText = t;
-            card.querySelector('.moist-val').innerText = m;
-            card.querySelector('.elec-val').innerText = e;
-            const tWidth = Math.min(Math.max((t / 50) * 100, 0), 100);
-            card.querySelector('.temp-fill').style.width = tWidth + "%";
-            card.querySelector('.moist-fill').style.width = Math.min(m, 100) + "%";
-            card.querySelector('.elec-fill').style.width = Math.min((e / 10000) * 100, 100) + "%";
+            // Backend "datum" obyektida yoki to'g'ridan-to'g'ri ildizda saqlayotganini tekshirish
+            const sensorData = device.datum ? device.datum : device;
+            const cardId = `device-${eui}`;
+
+            // Vaqtni hisoblash
             let timeText = "--:--:--";
             if (sensorData.created_at) {
                 const dateObj = new Date(sensorData.created_at);
@@ -313,21 +270,77 @@
             } else {
                 timeText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
             }
-            card.querySelector('.last-update').innerText = timeText;
-            const geoContainer = card.querySelector('.geo-container');
-            const geoLink = card.querySelector('.geo-link');
-            if (locUrl) {
-                geoLink.href = locUrl;
-                geoContainer.style.display = 'inline';
-            } else {
-                geoContainer.style.display = 'none';
+
+            // ============================================
+            // 1. DINAMIK METRIKALARNI YIG'ISH
+            // ============================================
+            let metricsHTML = '';
+
+            // Agar harorat bo'lsa
+            if (sensorData.temperature !== undefined) {
+                metricsHTML += buildMetricCard('Температура', '🌡️', sensorData.temperature, '°C', 'color-temp', 50); // Maks 50 gradus faraz qilinadi
             }
-            const indicator = card.querySelector('.status-dot');
-            indicator.style.backgroundColor = '#22c55e';
-            indicator.classList.add('pulse');
+
+            // Agar namlik bo'lsa
+            if (sensorData.moisture !== undefined) {
+                metricsHTML += buildMetricCard('Влажность', '💧', sensorData.moisture, '%', 'color-moist', 100); // 100% gacha
+            }
+
+            // Agar elektr o'tkazuvchanlik bo'lsa
+            if (sensorData.electricity !== undefined) {
+                metricsHTML += buildMetricCard('Проводимость (EC)', '⚡', sensorData.electricity, 'µS/cm', 'color-elec', 10000);
+            }
+
+            // Agar yorug'lik (LGT-1) bo'lsa
+            if (sensorData.illumination !== undefined) {
+                metricsHTML += buildMetricCard('Освещенность', '☀️', sensorData.illumination, 'Lux', 'color-illum', 2000); // Quyoshli kunda 2000 gacha yetishi mumkin
+            }
+
+            // Agar chuqurlik (SWL-1) bo'lsa
+            if (sensorData.depth !== undefined) {
+                metricsHTML += buildMetricCard('Глубина / Уровень', '📏', sensorData.depth, 'м', 'color-depth', 5); // Masalan 5 metrgacha
+            }
+
+            // Agar umuman hech qanday ma'lumot kelmasa
+            if(metricsHTML === '') {
+                metricsHTML = `<div style="text-align:center; color: #64748b; padding: 20px;">Нет данных с датчиков</div>`;
+            }
+
+            // ============================================
+            // 2. KARTANI DOM-ga JOYLASHTIRISH
+            // ============================================
+            let card = document.getElementById(cardId);
+            if (!card) {
+                card = document.createElement('div');
+                card.className = 'dashboard';
+                card.id = cardId;
+                card.onclick = () => { window.location.href = `/data/${eui}`; };
+                container.appendChild(card);
+            }
+
+            // Kartaning to'liq ichki HTML tuzilishini qaytadan yozamiz
+            card.innerHTML = `
+                <div class="header">
+                    <h2 class="dev-name">${name}</h2>
+                    <div class="status-container">
+                        <span class="status-dot pulse"></span>
+                        <small class="dev-eui">ID: ${eui}</small>
+                    </div>
+                </div>
+
+                <div class="metrics-container">
+                    ${metricsHTML}
+                </div>
+
+                <div class="footer">
+                    Обновлено в <span>${timeText}</span>
+                    ${locUrl ? `<span style="display:inline;"> | <a href="${locUrl}" target="_blank" class="geo-link" onclick="event.stopPropagation();">Локация</a></span>` : ''}
+                </div>
+            `;
         });
     }
 
+    // Dastlabki ishga tushirish va har 15 soniyada yangilash
     fetchData();
     setInterval(fetchData, 15000);
 </script>
