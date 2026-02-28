@@ -328,6 +328,8 @@
             `;
         });
     }
+
+
     fetchData();
     setInterval(fetchData, 15000);
 </script>
