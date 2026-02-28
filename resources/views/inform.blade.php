@@ -328,8 +328,6 @@
             `;
         });
     }
-
-    // Dastlabki ishga tushirish va har 15 soniyada yangilash
     fetchData();
     setInterval(fetchData, 15000);
 </script>
