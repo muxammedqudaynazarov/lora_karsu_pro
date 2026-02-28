@@ -11,6 +11,19 @@ class LoraController extends Controller
     public function index()
     {
         $devices = Device::with('datum')->orderBy('deviceName')->where('status', '1')->get();
+
+        $devices->each(function ($device) {
+            if ($device->datum) {
+                // 1. Keraksiz qatorlarni yashirish
+                $device->datum->makeHidden(['temperature', 'moisture', 'electricity']);
+
+                // 2. String ko'rinishidagi JSON ma'lumotni Array (massiv) ga o'girish
+                if (is_string($device->datum->data)) {
+                    $device->datum->data = json_decode($device->datum->data, true);
+                }
+            }
+        });
+
         return response()->json($devices);
     }
 
