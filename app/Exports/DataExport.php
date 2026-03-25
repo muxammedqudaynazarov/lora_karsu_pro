@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Datum;
+use App\Models\Datum; // Yoki model nomi Data bo'lsa shunga o'zgartiring
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -17,15 +17,15 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     protected $dynamicKeys = [];
     protected $dataCollection;
 
-    // Qat'iy belgilangan ustunlar
+    // Faqat shu ro'yxatdagilar Excelga chiqadi, qolgani bloklanadi!
     protected $columnsConfig = [
-        'devEUI' => ['label' => 'ID устройства', 'unit' => '', 'color' => ''],
-        'deviceName' => ['label' => 'Имя устройства', 'unit' => '', 'color' => ''],
-        'moisture' => ['label' => 'Влажность', 'unit' => '%', 'color' => ''],
-        'electricity' => ['label' => 'Проводимость', 'unit' => 'µS/cm', 'color' => ''],
-        'illumination' => ['label' => 'Освещенность', 'unit' => 'Lux', 'color' => ''],
-        'temperature' => ['label' => 'Температура', 'unit' => '°C', 'color' => ''],
-        'depth' => ['label' => 'Глубина', 'unit' => 'м', 'color' => ''],
+        'devEUI'       => ['label' => 'ID устройства', 'unit' => '', 'color' => ''],
+        'deviceName'   => ['label' => 'Имя устройства', 'unit' => '', 'color' => ''],
+        'temperature'  => ['label' => 'Температура',   'unit' => '°C', 'color' => 'ef4444'],
+        'moisture'     => ['label' => 'Влажность',     'unit' => '%', 'color' => '3b82f6'],
+        'electricity'  => ['label' => 'Проводимость',  'unit' => 'µS/cm', 'color' => 'f59e0b'],
+        'illumination' => ['label' => 'Освещенность',  'unit' => 'Lux', 'color' => '8b5cf6'],
+        'depth'        => ['label' => 'Глубина',       'unit' => 'м', 'color' => '06b6d4'],
     ];
 
     public function __construct($deviceId, $startDate = null, $endDate = null)
@@ -44,23 +44,26 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         $allowedKeys = array_keys($this->columnsConfig);
 
         foreach ($this->dataCollection as $item) {
-            $jsonData = is_array($item->data) ? $item->data : json_decode($item->data, true);
+            // 1. Bazadagi asosiy ustunlar (temperature, moisture va hk)
+            $rowArr = $item->toArray();
 
-            if (is_array($jsonData)) {
-                foreach ($jsonData as $k => $v) {
-                    // 1. Kalit bizning ro'yxatda bormi?
-                    // 2. Qiymati null yoki bo'sh emasmi? (0 degan qiymatni o'tkazadi)
-                    if (in_array($k, $allowedKeys) && $v !== null && $v !== '') {
-                        $keys[] = $k;
-                    }
+            // 2. JSON ustunidagi ma'lumotlar (devEUI, deviceName)
+            $jsonData = is_array($item->data) ? $item->data : json_decode($item->data, true);
+            $jsonData = is_array($jsonData) ? $jsonData : [];
+
+            // 3. Ikkala datani bittaga birlashtiramiz!
+            $combinedData = array_merge($rowArr, $jsonData);
+
+            foreach ($combinedData as $k => $v) {
+                // Kalit ro'yxatda bor bo'lsa va qiymati bo'sh bo'lmasa qabul qilamiz
+                if (in_array($k, $allowedKeys) && $v !== null && trim((string)$v) !== '') {
+                    $keys[] = $k;
                 }
             }
         }
 
-        // Unikal kalitlarni olamiz
+        // Unikal ustunlarni olib, tartibni to'g'rilaymiz
         $uniqueKeys = array_unique($keys);
-
-        // Ustunlar tartibi doim $columnsConfig dagi kabi chiroyli bo'lishi uchun tartiblaymiz
         $this->dynamicKeys = array_values(array_intersect($allowedKeys, $uniqueKeys));
     }
 
@@ -71,7 +74,7 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 
     public function headings(): array
     {
-        $headings = ['ID', 'Местоположение устройства', 'Дата информации'];
+        $headings = ['ID', 'Device Location', 'Sana'];
 
         foreach ($this->dynamicKeys as $key) {
             $unit = !empty($this->columnsConfig[$key]['unit']) ? ' (' . $this->columnsConfig[$key]['unit'] . ')' : '';
@@ -83,8 +86,12 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 
     public function map($row): array
     {
+        // Yana datalarni birlashtiramizki qiymatlarni topish kafolatlansin
+        $rowArr = $row->toArray();
         $jsonData = is_array($row->data) ? $row->data : json_decode($row->data, true);
-        $jsonData = $jsonData ?? [];
+        $jsonData = is_array($jsonData) ? $jsonData : [];
+
+        $combinedData = array_merge($rowArr, $jsonData);
 
         $mapped = [
             $row->id,
@@ -92,8 +99,9 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $row->created_at ? $row->created_at->format('d.m.Y H:i:s') : '',
         ];
 
+        // Topilgan har bir kalit bo'yicha ma'lumotlarni qatorga teramiz
         foreach ($this->dynamicKeys as $key) {
-            $mapped[] = $jsonData[$key] ?? null;
+            $mapped[] = $combinedData[$key] ?? null;
         }
 
         return $mapped;
