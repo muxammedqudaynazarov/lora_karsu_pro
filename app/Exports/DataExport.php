@@ -17,6 +17,7 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     protected $dynamicKeys = [];
     protected $dataCollection;
 
+    // Строго заданные колонки (всё остальное будет игнорироваться)
     protected $columnsConfig = [
         'devEUI' => ['label' => 'ID устройства', 'unit' => '', 'color' => ''],
         'deviceName' => ['label' => 'Имя устройства', 'unit' => '', 'color' => ''],
@@ -25,34 +26,33 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         'illumination' => ['label' => 'Освещенность', 'unit' => 'Lux', 'color' => ''],
         'temperature' => ['label' => 'Температура', 'unit' => '°C', 'color' => ''],
         'depth' => ['label' => 'Глубина', 'unit' => 'м', 'color' => ''],
-        'battery' => ['label' => 'Батарейка', 'unit' => '%', 'color' => '']
     ];
 
-    // Konstruktorga start va end datelarni qo'shamiz (default qiymati null)
     public function __construct($deviceId, $startDate = null, $endDate = null)
     {
         $this->deviceId = $deviceId;
 
-        // Asosiy so'rovni shakllantiramiz
         $query = Datum::where('device_id', $this->deviceId);
 
-        // Agar vaqt oralig'i berilgan bo'lsa, filterlaymiz
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
-        // Ma'lumotlarni yuklaymiz
         $this->dataCollection = $query->get();
 
-        // Dinamik kalitlarni yig'ish (bu qism o'zgarishsiz qoladi)
         $keys = [];
+        // Получаем список разрешенных ключей из конфигурации
+        $allowedKeys = array_keys($this->columnsConfig);
+
         foreach ($this->dataCollection as $item) {
             $jsonData = is_array($item->data) ? $item->data : json_decode($item->data, true);
 
             if (is_array($jsonData)) {
-                $keys = array_merge($keys, array_keys($jsonData));
+                $validKeys = array_intersect(array_keys($jsonData), $allowedKeys);
+                $keys = array_merge($keys, $validKeys);
             }
         }
+
         $this->dynamicKeys = array_unique($keys);
     }
 
@@ -63,15 +63,11 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 
     public function headings(): array
     {
-        $headings = ['ID', 'Device Location', 'Sana'];
+        $headings = ['ID', 'Местоположение устройства', 'Дата информации'];
 
         foreach ($this->dynamicKeys as $key) {
-            if (isset($this->columnsConfig[$key])) {
-                $unit = !empty($this->columnsConfig[$key]['unit']) ? ' (' . $this->columnsConfig[$key]['unit'] . ')' : '';
-                $headings[] = $this->columnsConfig[$key]['label'] . $unit;
-            } else {
-                $headings[] = ucfirst($key);
-            }
+            $unit = !empty($this->columnsConfig[$key]['unit']) ? ' (' . $this->columnsConfig[$key]['unit'] . ')' : '';
+            $headings[] = $this->columnsConfig[$key]['label'] . $unit;
         }
 
         return $headings;
@@ -88,6 +84,7 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $row->created_at ? $row->created_at->format('d.m.Y H:i:s') : '',
         ];
 
+        // Добавляем в таблицу только данные по разрешенным ключам
         foreach ($this->dynamicKeys as $key) {
             $mapped[] = $jsonData[$key] ?? null;
         }
@@ -103,7 +100,7 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         foreach ($this->dynamicKeys as $key) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
 
-            if (isset($this->columnsConfig[$key]) && !empty($this->columnsConfig[$key]['color'])) {
+            if (!empty($this->columnsConfig[$key]['color'])) {
                 $color = str_replace('#', '', $this->columnsConfig[$key]['color']);
 
                 $sheet->getStyle($colLetter . '1')->applyFromArray([
