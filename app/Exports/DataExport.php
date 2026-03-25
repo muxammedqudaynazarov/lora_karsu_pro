@@ -17,7 +17,7 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     protected $dynamicKeys = [];
     protected $dataCollection;
 
-    // Строго заданные колонки (всё остальное будет игнорироваться)
+    // Qat'iy belgilangan ustunlar
     protected $columnsConfig = [
         'devEUI' => ['label' => 'ID устройства', 'unit' => '', 'color' => ''],
         'deviceName' => ['label' => 'Имя устройства', 'unit' => '', 'color' => ''],
@@ -41,19 +41,27 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         $this->dataCollection = $query->get();
 
         $keys = [];
-        // Получаем список разрешенных ключей из конфигурации
         $allowedKeys = array_keys($this->columnsConfig);
 
         foreach ($this->dataCollection as $item) {
             $jsonData = is_array($item->data) ? $item->data : json_decode($item->data, true);
 
             if (is_array($jsonData)) {
-                $validKeys = array_intersect(array_keys($jsonData), $allowedKeys);
-                $keys = array_merge($keys, $validKeys);
+                foreach ($jsonData as $k => $v) {
+                    // 1. Kalit bizning ro'yxatda bormi?
+                    // 2. Qiymati null yoki bo'sh emasmi? (0 degan qiymatni o'tkazadi)
+                    if (in_array($k, $allowedKeys) && $v !== null && $v !== '') {
+                        $keys[] = $k;
+                    }
+                }
             }
         }
 
-        $this->dynamicKeys = array_unique($keys);
+        // Unikal kalitlarni olamiz
+        $uniqueKeys = array_unique($keys);
+
+        // Ustunlar tartibi doim $columnsConfig dagi kabi chiroyli bo'lishi uchun tartiblaymiz
+        $this->dynamicKeys = array_values(array_intersect($allowedKeys, $uniqueKeys));
     }
 
     public function collection()
@@ -84,7 +92,6 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $row->created_at ? $row->created_at->format('d.m.Y H:i:s') : '',
         ];
 
-        // Добавляем в таблицу только данные по разрешенным ключам
         foreach ($this->dynamicKeys as $key) {
             $mapped[] = $jsonData[$key] ?? null;
         }
