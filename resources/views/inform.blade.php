@@ -165,7 +165,7 @@
                 </div>
                 <div class="metrics-container">${metricsHTML || '<div style="text-align:center;color:#94a3b8">Нет данных</div>'}</div>
                 <div class="footer">Обновлено: ${new Date(device.datum?.created_at).toLocaleTimeString()}
-                ${device.location ? ` | <a href="${device.location}" target="_blank" class="geo-link">Местоположение</a>` : ''}</div>`;
+                ${device.location ? ` | <a href="${device.location}" target="_blank" class="geo-link" onclick="event.stopPropagation()">Местоположение</a>` : ''}</div>`;
         });
     }
     fetchData(); setInterval(fetchData, 15000);
