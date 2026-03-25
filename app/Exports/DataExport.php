@@ -18,11 +18,11 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     protected $dataCollection;
 
     protected $columnsConfig = [
-        'moisture'     => ['label' => 'Влажность',     'unit' => '%', 'color' => '3b82f6'],
-        'electricity'  => ['label' => 'Проводимость',  'unit' => 'µS/cm', 'color' => 'f59e0b'],
-        'illumination' => ['label' => 'Освещенность',  'unit' => 'Lux', 'color' => '8b5cf6'],
-        'temperature'  => ['label' => 'Температура',   'unit' => '°C', 'color' => 'ef4444'],
-        'depth'        => ['label' => 'Глубина',       'unit' => 'м', 'color' => '06b6d4'],
+        'moisture'     => ['label' => 'Влажность',     'unit' => '%', 'color' => ''],
+        'electricity'  => ['label' => 'Проводимость',  'unit' => 'µS/cm', 'color' => ''],
+        'illumination' => ['label' => 'Освещенность',  'unit' => 'Lux', 'color' => ''],
+        'temperature'  => ['label' => 'Температура',   'unit' => '°C', 'color' => ''],
+        'depth'        => ['label' => 'Глубина',       'unit' => 'м', 'color' => ''],
     ];
 
     public function __construct($deviceId, $startDate = null, $endDate = null)
