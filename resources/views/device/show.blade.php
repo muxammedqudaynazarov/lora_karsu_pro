@@ -168,25 +168,21 @@
             </p>
         </div>
     </div>
-    @if($device->location)
+    {{--@if($device->location)
         <div class="map-card" style="background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h2 style="margin-top: 0; font-size: 1.25rem; color: var(--text); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                📍 Местоположение устройства
-            </h2>
             <div style="position: relative; width: 100%; height: 350px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--bg);">
                 <iframe
-                    src="{{ $device->location }}"
+                    src="https://maps.google.com/maps?q={{ urlencode($device->location) }}&output=embed"
                     width="100%"
                     height="100%"
                     frameborder="0"
                     style="border:0;"
                     allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
+                    loading="lazy">
                 </iframe>
             </div>
         </div>
-    @endif
+    @endif--}}
     <div class="chart-container" id="main-chart-sec" style="display:none">
         <h2 class="chart-title">Динамика показателей</h2>
         <div class="canvas-wrapper-main">
