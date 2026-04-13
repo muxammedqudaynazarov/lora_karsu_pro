@@ -55,4 +55,64 @@ class DeviceController extends Controller
         $fileName = 'sensor_data_device_' . $id . '_' . date('dmYHis') . '.xlsx';
         return Excel::download(new DataExport($id, $startDate, $endDate), $fileName);
     }
+
+    public function devices()
+    {
+        $devices = Device::select(['id', 'deviceName', 'devEUI', 'location'])->where('status', '1')->get();
+        return $devices;
+    }
+
+    public function device_data($id, $day = 3)
+    {
+        $device = Device::where('id', $id)->where('status', '1')->first();
+
+        if (!$device) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Device not found!',
+            ], 404);
+        }
+        $last30DaysData = $device->data()
+            ->select(['id', 'data', 'created_at'])
+            ->where('created_at', '>=', now()->subDays($day))
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                if (is_string($item->data)) {
+                    $item->data = json_decode($item->data, true);
+                }
+                $item->timestamp = Carbon::parse($item->created_at)->timestamp * 1000;
+                unset($item->created_at);
+                return $item;
+            });
+        return response()->json([
+            'success' => true,
+            'device' => $device->only(['id', 'deviceName', 'devEUI', 'location']),
+            'data' => $last30DaysData
+        ]);
+    }
+
+    public function now()
+    {
+        $devices = Device::select(['id', 'deviceName', 'devEUI', 'location'])->where('status', '1')->with('datum')->get();
+        $formattedData = $devices->map(function ($device) {
+            if (!$device->datum) {
+                return null;
+            }
+
+            $dataArray = is_string($device->datum->data)
+                ? json_decode($device->datum->data, true)
+                : $device->datum->data;
+            $timestamp = Carbon::parse($device->datum->created_at)->timestamp * 1000;
+            return [
+                'id' => $device->datum->id,
+                'deviceName' => $device->deviceName,
+                'devEUI' => $device->devEUI,
+                'location' => $device->location,
+                'data' => $dataArray,
+                'timestamp' => $timestamp,
+            ];
+        })->filter();
+        return response()->json($formattedData->values());
+    }
 }
