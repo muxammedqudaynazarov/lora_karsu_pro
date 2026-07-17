@@ -113,7 +113,7 @@
 <div id="app-container" class="app-container"></div>
 
 <script>
-    const API_URL = 'https://wan.nmtu.uz/api/lora/get';
+    const API_URL = 'http://192.168.1.105:8000/api/lora/get';
     const container = document.getElementById('app-container');
 
     async function fetchData() {
